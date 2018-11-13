@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>linear VPAID</title>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:600,400,700' rel='stylesheet' type='text/css'>
+    <style>
+        body {
+            font-family: Sans-Serif;
+            color: #fff;
+            font-size: 18px;
+        }
+        #container{
+            display: none;
+        }
+        #vidHolder {
+            position: absolute;
+        }
+        ft-richload {
+            width: 640px;
+            height: 360px;
+        }
+        ft-video::shadow video {
+            width: 100%;
+            height: 100%;
+            -o-object-fit: cover;
+               object-fit: cover;
+        }
+
+        ft-video video {
+            width: 100%;
+            height: 100%;
+            -o-object-fit: cover;
+               object-fit: cover;
+        }
+
+        ft-video {
+            width: 100%;
+            height: 100%;
+            -o-object-fit: cover;
+               object-fit: cover;
+        }
+                        
+        #muteBtn{
+            position: absolute;
+            top: -20px;
+            left: 13px;
+            width: 33px;
+            height: 56px;
+            border-radius: 5px;
+            background-color: #fff;
+            box-shadow: 0px 2px 2px 1px rgba(0,0,0,0.3);
+            -webkit-transition: top 0.15s ease-out;
+            transition: top 0.15s ease-out;
+            cursor: pointer;
+            display: none;
+        }
+        
+        #muteBtn:hover {
+            top: -10px;
+        }
+        
+        #muteBtn svg{
+            bottom: 4px;
+            left: 7px;
+            position: absolute;
+            width: 25px;
+            fill: #555;
+            -webkit-transition: fill 0.15s ease-in;
+            transition: fill 0.15s ease-in;
+        }
+        
+        #muteBtn:hover svg{
+            fill: #000;
+        }
+        
+        
+    </style>
+</head>
+
+<body>
+
+    <div id="container">
+        
+        <ft-richload name="richload" id="richload1"></ft-richload>
+        <div id="vidHolder" class="vidSmall">
+            <ft-video id="myVideo" name="video1" autoplay muted clicktag="1"></ft-video>
+        </div>
+        <div id="muteBtn">
+            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 20 20">
+                                                
+                        <path style="transform: scale(0.019);" d="M128 384H0v256h128l256 192h64V192h-64L128 384zM538.51 421.49c-12.496-12.497-32.758-12.497-45.255 0-12.496 12.496-12.496 32.758 0 45.255 24.994 24.993 24.994 65.516 0 90.51-12.496 12.496-12.496 32.758 0 45.255 12.497 12.496 32.759 12.496 45.255 0C588.497 552.521 588.497 471.477 538.51 421.49zM629.02 330.981c-12.495-12.497-32.758-12.497-45.255 0-12.495 12.496-12.495 32.758 0 45.255 74.981 74.98 74.981 196.548 0 271.528-12.495 12.497-12.495 32.76 0 45.256 12.497 12.496 32.76 12.496 45.255 0C728.994 593.046 728.994 430.955 629.02 330.981zM719.529 240.471c-12.497-12.497-32.76-12.497-45.255 0-12.496 12.496-12.496 32.758 0 45.255 124.968 124.968 124.968 327.58 0 452.548-12.496 12.497-12.496 32.759 0 45.255 12.495 12.497 32.758 12.497 45.255 0C869.49 633.567 869.49 390.432 719.529 240.471z"/>
+            
+            </svg>
+            
+            
+        </div>
+            
+        
+    </div>
+
+
+    <script src="https://cdn.flashtalking.com/frameworks/js/api/2/10/html5API.js"></script>
+
+    <script>
+        myFT.require(['vpaid'], function(vpaid) {
+            var mouseOverAd = false;
+            var mouseOverZoom = true;
+            var myVid = myFT.$("ft-video");
+            var currentVol = 1;
+            /*var mac = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+            var android = /(android)/i.test(navigator.userAgent);
+            var chrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+            var muted = (mac || android || chrome)?true:false;*/
+            var muted = true;
+            var videoCoords;
+            
+            /////////no camvas vid
+            var browser = navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./);
+            browser = browser ? parseInt(browser[2], 10) : false;
+
+            if ('playsInline' in document.createElement('video')) {
+                Object.defineProperty(FT.prototype.Video, 'userInitiatesPlayback', {
+                    value: false,
+                    writable: false
+                });
+            } else if (/Android/i.test(navigator.userAgent) && browser && browser >= 53) {
+                Object.defineProperty(FT.prototype.Video, 'userInitiatesPlayback', {
+                    value: false,
+                    writable: false
+                });
+            }
+            
+            vpaid.on('start', function() {
+                
+                
+                
+                //init();
+                if(myFT.richloadsLoaded){
+                    init();
+                }else{
+                    myFT.on("richload", init)
+                }
+                
+                
+            });
+            
+            function init(){
+                
+                (muted) && myFT.$("#muteBtn").css("display", "block");
+                
+                myVid[0].muted = muted;
+                
+                function metaDa(){
+                    myVid[0].video.volume = currentVol;
+                    setInterval(function(){
+                        vpaid.setDuration(myVid[0].video.duration-myVid[0].video.currentTime+0.5);
+                    },1000)
+                }
+                
+                if(myVid[0].video.readyState == 0){
+                    myVid.on('loadedmetadata', metaDa);
+                }else{
+                    metaDa();
+                }
+                
+                myFT.$("#container").css("display", "block");
+                
+                setTimeout(function(){
+                    if(!mouseOverAd && mouseOverZoom){
+                        myFT.$("#vidHolder").css({ "left": "0px", "top": "0px", "width": "640px", "height": "360px" });
+                    }
+                },5000);
+            }
+            
+            myFT.on("instantads", function(){
+                videoCoords = myFT.instantAds.videoPos_X_Y_Width.trim().split(" ").join("").split(",");
+                mouseOverZoom = (myFT.instantAds.zoom=="on")?true:false;
+                myFT.$("#vidHolder").css({ "left": +videoCoords[0]+"px", "top": videoCoords[1]+"px", "width": videoCoords[2]+"px", "height": videoCoords[2]*9/16+"px" });
+                myFT.$("#vidHolder").css({ "-webkit-transition": "all 0.3s cubic-bezier(0.8,0,1,0.5)", "transition": "all 0.3s cubic-bezier(0.8,0,1,0.5)" });
+                if(mouseOverZoom){
+                    myFT.on("rollover", function(){
+                        mouseOverAd = true;
+                        myFT.$("#vidHolder").css({ "left": +videoCoords[0]+"px", "top": videoCoords[1]+"px", "width": videoCoords[2]+"px", "height": videoCoords[2]*9/16+"px" });
+                    });
+                    myFT.on("rollout", function(){
+                        mouseOverAd = false;
+                        myFT.$("#vidHolder").css({ "left": "0px", "top": "0px", "width": "640px", "height": "360px" });
+                    });
+                }
+            })
+            
+                        
+            myFT.$("#muteBtn").on("click", function() {
+                myFT.$("#muteBtn").css("display", "none");
+                myVid[0].unmute();
+                vpaid.setAdVolume(1);
+                /*vpaid.setDuration(myVid[0].video.duration);
+                myVid[0].restart();*/
+            });
+            
+                        
+            vpaid.on('pause', function(event) {
+                myVid[0].pause();
+            });
+
+            vpaid.on('resume', function(event) {
+                myVid[0].play();
+            });
+
+            vpaid.on('volumechange', function(event) {
+                currentVol = event.volume;
+                
+                if(myVid[0]){
+                    myVid[0].video.volume = currentVol;
+                }
+            });  
+            
+        });
+    </script>
+</body>
+
+
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>linear VPAID</title>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:600,400,700' rel='stylesheet' type='text/css'>
+    <style>
+        body {
+            font-family: Sans-Serif;
+            color: #fff;
+            font-size: 18px;
+        }
+        #clickTag {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            z-index: 1;
+            cursor: pointer;
+        }
+        #vidHolder {
+            position: absolute;
+            width: 818px;
+            height: 460px;
+        }
+        #closebutton {
+            display: none;
+            position: absolute;
+            z-index: 2;
+            width: 130px;
+            height: 40px;
+            right: 0px;
+            bottom: 20px;
+            background-color: rgba(0, 0, 0, 0.85);
+            */ overflow: hidden;
+            cursor: default;
+        }
+        #closebutton.active:hover {
+            background-color: rgba(0, 0, 0, 1);
+            cursor: pointer;
+        }
+        #skipAd {
+            display: none;
+            position: absolute;
+            padding: 10px 15px;
+        }
+        #skipIcon {
+            position: relative;
+            top: 1px;
+        }
+        #countdown {
+            display: none;
+            position: absolute;
+            padding: 10px 15px;
+            width: 100px;
+        }
+        #resumebutton {
+            position: absolute;
+            z-index: 3;
+            width: 60px;
+            height: 60px;
+            left: calc(50% - 30px);
+            top: calc(50% - 30px);
+            background-color: rgba(0, 0, 0, 0.85);
+            border-radius: 50%;
+            display: none;
+        }
+        #resumebutton:hover {
+            background-color: rgba(0, 0, 0, 1);
+            cursor: pointer;
+        }
+        #playIcon{
+            position: absolute;
+            top: 20px;
+            left: 24px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="container">
+        <!--<div id="vidHolder"></div>-->
+        <div id="clickTag"></div>
+        <div id="resumebutton">
+            <svg version="1.1" id="playIcon" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" height="20px" viewBox="0 0 50 50" style="enable-background:new 0 0 50 50;" xml:space="preserve">
+                <polygon x="22" y="22" points="0,0 40,25 0,50 " style="fill:#FFFFFF;" />
+            </svg>
+        </div>
+        <div id="closebutton">
+            <div id="skipAd">
+                Skip Ad
+                <svg version="1.1" id="skipIcon" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" height="15px" viewBox="0 0 28 50" style="enable-background:new 0 0 27 50;" xml:space="preserve">
+                    <polygon points="0,0 22,25 0,50 " style="fill:#FFFFFF;" />
+                    <rect x="22" y="0.043" width="6" height="50" style="fill:#FFFFFF;" />
+                </svg>
+            </div>
+            <div id="countdown">
+                Skip Ad in ...
+            </div>
+        </div>
+    </div>
+
+
+    <script src="https://cdn.flashtalking.com/frameworks/js/api/2/10/html5API.js"></script>
+
+    <script>
+        myFT.require(['vpaid'], function(vpaid) {
+            vpaid.on('start', function() {
+                vpaid.playLinearVideo('video1');
+                
+                myFT.applyClickTag(myFT.$("#clickTag"), 1);
+
+                if (myFT.instantAds.closeBTN == "on") {
+                    var countdownTimer = Number(myFT.instantAds.closeBTN_afterXsec);
+                    (function countdown() {
+                        if (countdownTimer >= 1) {
+                            if (myFT.instantAds.closeBTN_countdown == "on") {
+                                myFT.$("#closebutton")[0].style.display = "block";
+                                myFT.$("#countdown")[0].style.display = "block";
+                                myFT.$("#countdown")[0].innerHTML = "Skip Ad in " + countdownTimer;
+                            }
+                            countdownTimer--;
+                            setTimeout(countdown, 1000);
+                        } else {
+                            myFT.$("#countdown")[0].style.display = "none";
+                            myFT.$("#skipAd")[0].style.display = "block";
+                            myFT.$("#closebutton")[0].style.display = "block";
+                            myFT.$("#closebutton").addClass("active");
+                            myFT.$("#closebutton").on("click", function() {
+                                myFT.tracker('skipAd');
+                                vpaid.skipAd();
+                            });
+                        }
+                    })();
+                }
+            });
+            //vpaid.dispatchEvent('start') // for offline test
+
+        });
+    </script>
+</body>
+
+
+</html>
